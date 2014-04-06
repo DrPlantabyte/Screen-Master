@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +43,7 @@ import javafx.stage.FileChooser;
  * @author cybergnome
  */
 public class MasterWindowController implements Initializable {
-	
+	// TODO: add version info and "About" popup
 	
 	@FXML private Region imgParent;
 	@FXML private ImageView imgView;
@@ -137,6 +138,26 @@ public class MasterWindowController implements Initializable {
 	@FXML private void viewResize(){
 		changeZoomMode((ZoomMode)zoomOptionsBox.getValue());
 	}
+	
+	private Path lastSaveLocation = null;
+	@FXML private void save(Event e){
+		if(lastSaveLocation == null){
+			saveAs(e);
+		} else {
+			saveTo(lastSaveLocation);
+		}
+	}
+	
+	@FXML private void saveAs(Event e){
+		// TODO: ask for save location
+	//	saveTo(f);
+	//	lastSaveLocation = f;
+	}
+	@FXML private void importImageSet(Event e){
+		// TODO: ask for save location
+	//	load(f);
+	}
+	
 	private Properties config(){
 		return ScreenMaster.getInstance().getConfig();
 	}
@@ -202,5 +223,9 @@ public class MasterWindowController implements Initializable {
 		if(currentImage == null) return;
 		currentImage.centerViewOn(deltaCenter.getX(), deltaCenter.getY(), imgView, imgParent,(ZoomMode)zoomOptionsBox.getValue());
 		currentImage.centerViewOn(deltaCenter.getX(), deltaCenter.getY(), ScreenMaster.getInstance().getDisplayImageView(), ScreenMaster.getInstance().getDisplayImageViewContainer(),(ZoomMode)zoomOptionsBox.getValue());
+	}
+
+	private void saveTo(Path lastSaveLocation) {
+		// TODO: implement
 	}
 }
