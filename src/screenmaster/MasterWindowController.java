@@ -20,6 +20,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
@@ -77,6 +78,7 @@ public class MasterWindowController implements Initializable {
 				// test
 				ManagedImage i = new ManagedImage(new FileInputStream(f));
 				i.setImage(imgView, imgParent, ZoomMode.lookUpByDisplayName(zoomOptionsBox.getValue().toString()));
+				imgParent.resize(imgParent.getWidth(), imgParent.getHeight()); // hack to force redraw if it didn't detect image change
 				// TODO
 			} catch (FileNotFoundException ex) {
 				Logger.getLogger(MasterWindowController.class.getName()).log(Level.SEVERE, null, ex);

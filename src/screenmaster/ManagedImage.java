@@ -31,9 +31,10 @@ public class ManagedImage {
 		imgView.setImage(img);
 		switch(zoomMode){
 			case NOZOOM: // do not scale
+				centerViewOn(0,0,imgView,container);
 				imgView.setSmooth(false);
-				imgView.setFitHeight(0); // 0 means ignore fitting/ otherwise this is the dimension measurement
-				imgView.setFitWidth(0);
+				imgView.setFitHeight(img.getHeight()); // 0 means ignore fitting/ otherwise this is the dimension measurement
+				imgView.setFitWidth(img.getWidth());
 				break;
 			case FIT: // scale but don't crop
 				imgView.setSmooth(true);
@@ -61,5 +62,20 @@ public class ManagedImage {
 				}
 				break;
 		}
+	}
+	/**
+	 * 
+	 * @param dx Coordinate of center of view, where (0,0) is the center of the 
+	 * image.
+	 * @param dy Coordinate of center of view, where (0,0) is the center of the 
+	 * image.
+	 * @param imgView
+	 * @param container 
+	 */
+	public void centerViewOn(double dx, double dy, ImageView imgView, Region container) {
+		double xOffset = (img.getWidth() - container.getWidth()) * 0.5;
+		double yOffset = (img.getHeight() - container.getHeight()) * 0.5;
+		Rectangle2D viewPortArea = new Rectangle2D(xOffset + dx, yOffset+dy,img.getWidth(),img.getHeight());
+		imgView.setViewport(viewPortArea);
 	}
 }
