@@ -84,7 +84,7 @@ public class ScreenMaster extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 		mainStage = stage;
-		Parent root = FXMLLoader.load(getClass().getResource("DisplayWindow.fxml"));
+		Parent root = FXMLLoader.load(getClass().getResource("MasterWindow.fxml"));
 		
 		Scene scene = new Scene(root);
 		
