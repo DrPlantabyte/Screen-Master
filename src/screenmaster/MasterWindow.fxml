@@ -51,9 +51,13 @@
               <children>
                 <SplitPane dividerPositions="0.5" focusTraversable="true" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                   <items>
-                    <AnchorPane fx:id="imgParent" minHeight="0.0" minWidth="0.0" onMouseDragged="#moveView" onMousePressed="#moveStart" onMouseReleased="#moveEnd" prefHeight="100.0" prefWidth="160.0">
+                    <AnchorPane id="imgParent" minHeight="0.0" minWidth="0.0" onMouseDragged="#moveView" onMousePressed="#moveStart" onMouseReleased="#moveEnd" prefHeight="100.0" prefWidth="160.0">
                       <children>
-                        <ImageView fx:id="imgView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <BorderPane fx:id="imgParent" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <center>
+                            <ImageView fx:id="imgView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+                          </center>
+                        </BorderPane>
                       </children>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">

@@ -52,15 +52,7 @@ public class ManagedImage {
 				break;
 			case FIT: // scale but don't crop
 				imgView.setSmooth(true);
-				double x = 0,y = 0;
-				if(imgAspectRatio > parentAspectRatio){
-					// image is wider than container
-					y = (img.getHeight()/container.getHeight())*(container.getHeight() - container.getWidth() / imgAspectRatio)/2;
-				} else {
-					// image is taller than container
-					x = (img.getWidth()/container.getWidth())*(container.getWidth() - container.getHeight() * imgAspectRatio)/2;
-				}
-				defaultViewportArea = new Rectangle2D(-x, -y,img.getWidth()+x,img.getHeight()+y);
+				defaultViewportArea = new Rectangle2D(0, 0,img.getWidth(),img.getHeight());
 				imgView.setViewport(defaultViewportArea);
 				if(imgAspectRatio > parentAspectRatio){
 					// image is wider than container
@@ -76,24 +68,23 @@ public class ManagedImage {
 				imgView.setSmooth(true);
 				if(imgAspectRatio > parentAspectRatio){
 					// image is wider than container
-					double finalImgWidth = imgAspectRatio * container.getHeight();
-					double finalImgHeight = container.getHeight();
-					double dx = (img.getWidth()/container.getWidth())*(finalImgWidth - container.getWidth())/2;
-					double dy = 0;
-					defaultViewportArea = new Rectangle2D(dx, dy,img.getWidth(),img.getHeight());
-					imgView.setViewport(defaultViewportArea);
-					imgView.setFitHeight(finalImgHeight); // 0 means ignore fitting/ otherwise this is the dimension measurement
-					imgView.setFitWidth(finalImgWidth);
+					double w = img.getHeight() * (parentAspectRatio);
+					double h = img.getHeight();
+					double m = 0.5*(img.getWidth() - w);
+					defaultViewportArea = new Rectangle2D(m, 0,w,h);
+					imgView.setViewport(defaultViewportArea);	
+					imgView.setFitHeight(container.getHeight()); // 0 means ignore fitting/ otherwise this is the dimension measurement
+					imgView.setFitWidth(0);
 				} else {
 					// image is taller than container
-					double finalImgWidth = container.getWidth();
-					double finalImgHeight = container.getWidth() / imgAspectRatio ;
-					double dx = 0;
-					double dy = (img.getHeight()/container.getHeight())*(finalImgHeight - container.getHeight())/2;
-					defaultViewportArea = new Rectangle2D(dx, dy,img.getWidth(),img.getHeight());
-					imgView.setViewport(defaultViewportArea);
-					imgView.setFitHeight(finalImgHeight); // 0 means ignore fitting/ otherwise this is the dimension measurement
-					imgView.setFitWidth(finalImgWidth);
+					double w = img.getWidth();
+					double h = img.getWidth() / parentAspectRatio;
+					double m = 0.5*(img.getHeight() - h);
+					defaultViewportArea = new Rectangle2D(0, m,w,h);
+					imgView.setViewport(defaultViewportArea);	
+					imgView.setFitHeight(0); // 0 means ignore fitting/ otherwise this is the dimension measurement
+					imgView.setFitWidth(container.getWidth());
+					
 				}
 				break;
 		}
