@@ -9,20 +9,29 @@ package screenmaster;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 
@@ -36,12 +45,11 @@ public class MasterWindowController implements Initializable {
 	@FXML private Region imgParent;
 	@FXML private ImageView imgView;
 	@FXML private ListView listView;
-	@FXML private ChoiceBox zoomOptionsBox;
+	@FXML private ComboBox zoomOptionsBox;
 	
-	@FXML
-	private void handleButtonAction(ActionEvent event) {
-		System.out.println(zoomOptionsBox.getValue().toString());
-	}
+	private final ObservableList<ManagedImage> imageList = FXCollections.observableArrayList();
+	
+	
 	FileChooser fileChooser;
 	@FXML private void openFiles(){
 		List<File> chosenFiles = fileChooser.showOpenMultipleDialog(ScreenMaster.getInstance().getMainStage());
@@ -59,12 +67,71 @@ public class MasterWindowController implements Initializable {
 		
 		fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Resource File");
-		fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("image files", "png","jpg","jpeg","gif"));//,"svg")); // SVG support comming soon
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("image files", 
+				"*.png","*.jpg","*.jpeg","*.gif","*.PNG","*.JPG","*.JPEG","*.GIF"));//,"svg","SVG")); // SVG support comming soon
 		// TODO: SVG support
 		fileChooser.setInitialDirectory(new File(config().getProperty("lastImageDir", ".")));
+		
+		listView.setItems(imageList);
+		listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		// TODO: listView.setCellFactory(...);
+		
+		ChangeListener resizeListener = new ChangeListener(){
+			@Override
+			public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+				viewResize();
+			}
+		};
+		imgParent.heightProperty().addListener(resizeListener); // method overloading makes using a lambda here tricky
+		imgParent.widthProperty().addListener(resizeListener);
 		// TODO
+		loadLastSession();
 	}	
 	
+	@FXML private void deleteSelectedItems(javafx.event.Event e){
+		ArrayList targets = new ArrayList();
+		targets.addAll(listView.getSelectionModel().getSelectedItems());
+		for(Object o : targets){
+			imageList.remove(o);
+		}
+	}
+	
+	@FXML private void listViewClick(MouseEvent e){
+		if(e.getSource() == listView && e.getClickCount() == 2){
+			ManagedImage target = (ManagedImage)listView.getSelectionModel().getSelectedItem();
+			setImage(target);
+		}
+	}
+	@FXML private void zoomModeChange(javafx.event.Event e){
+		ZoomMode zm = (ZoomMode)zoomOptionsBox.getValue();
+		changeZoomMode(zm);
+	}
+	private Point2D dragStart = null;
+	private Point2D currentCenter = new Point2D(0,0);
+	@FXML private void moveView(MouseEvent e){
+		if(dragStart != null){
+			double dx = e.getScreenX()-dragStart.getX();
+			double dy = e.getScreenY()-dragStart.getY();
+			currentCenter = currentCenter.add(-dx, -dy);
+			dragStart = dragStart.add(dx,dy);
+			centerViewOn(currentCenter);
+		}
+	}
+	@FXML private void moveStart(MouseEvent e){
+		dragStart = new Point2D(e.getScreenX(), e.getScreenY());
+	}
+	
+	@FXML private void moveEnd(MouseEvent e){
+		dragStart = null;
+	}
+	@FXML private void recenter(Event e){
+		currentCenter = new Point2D(0,0);
+		centerViewOn(currentCenter);
+	}
+	
+	@FXML private void viewResize(){
+		changeZoomMode((ZoomMode)zoomOptionsBox.getValue());
+	}
 	private Properties config(){
 		return ScreenMaster.getInstance().getConfig();
 	}
@@ -75,14 +142,51 @@ public class MasterWindowController implements Initializable {
 			// TODO: SVG
 		} else {
 			try {
-				// test
-				ManagedImage i = new ManagedImage(new FileInputStream(f));
-				i.setImage(imgView, imgParent, ZoomMode.lookUpByDisplayName(zoomOptionsBox.getValue().toString()));
-				imgParent.resize(imgParent.getWidth(), imgParent.getHeight()); // hack to force redraw if it didn't detect image change
-				// TODO
-			} catch (FileNotFoundException ex) {
+				ManagedImage mi = new ManagedImage(f);
+				imageList.add(mi);
+			} catch (IOException ex) {
 				Logger.getLogger(MasterWindowController.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		saveFileList();
+	}
+
+	private void saveFileList() {
+		StringBuilder sb = new StringBuilder();
+		for(ManagedImage m : imageList){
+			sb.append(m.getSrcFile().toPath()).append(File.pathSeparator);
+		}
+		config().setProperty("lastSession", sb.toString());
+	}
+	
+	private void loadLastSession(){
+		if(config().containsKey("lastSession")){
+			String[] filePaths = config().getProperty("lastSession").split(File.pathSeparator);
+			for(String path : filePaths){
+				File f = new File(path);
+				if(f.exists()){
+					addImage(f);
+				}
+			}
+		}
+	}
+
+	private ManagedImage currentImage = null;
+	private void setImage(ManagedImage image) {
+		currentImage = image;
+		image.setImage(imgView, imgParent, (ZoomMode)zoomOptionsBox.getValue());
+		// TODO: set other window's image too
+	}
+	
+	private void changeZoomMode(ZoomMode zm){
+		if(currentImage == null) return;
+		currentImage.setImage(imgView, imgParent, zm);
+		currentCenter = new Point2D(0,0);
+		centerViewOn(currentCenter);
+	}
+
+	private void centerViewOn(Point2D deltaCenter) {
+		if(currentImage == null) return;
+		currentImage.centerViewOn(deltaCenter.getX(), deltaCenter.getY(), imgView, imgParent,(ZoomMode)zoomOptionsBox.getValue());
 	}
 }
