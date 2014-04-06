@@ -23,8 +23,16 @@
                     <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                   </accelerator>
                 </MenuItem>
-                <MenuItem mnemonicParsing="false" text="Save Image Set" />
-                <MenuItem mnemonicParsing="false" text="Save Image Set As..." />
+				<MenuItem mnemonicParsing="false" text="Save Image Set">
+					<accelerator>
+						<KeyCodeCombination alt="UP" code="S" control="ANY" meta="UP" shift="UP" shortcut="UP" />
+					</accelerator>
+				</MenuItem>
+                <MenuItem mnemonicParsing="false" text="Save Image Set As...">
+                  <accelerator>
+                    <KeyCodeCombination alt="UP" code="S" control="ANY" meta="UP" shift="ANY" shortcut="UP" />
+                  </accelerator>
+                </MenuItem>
                 <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem mnemonicParsing="false" text="Quit" />
               </items>

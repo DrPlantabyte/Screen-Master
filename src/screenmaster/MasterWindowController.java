@@ -86,7 +86,10 @@ public class MasterWindowController implements Initializable {
 		};
 		imgParent.heightProperty().addListener(resizeListener); // method overloading makes using a lambda here tricky
 		imgParent.widthProperty().addListener(resizeListener);
-		// TODO
+		ScreenMaster sm = ScreenMaster.getInstance();
+		sm.getDisplayImageViewContainer().heightProperty().addListener(resizeListener);
+		sm.getDisplayImageViewContainer().widthProperty().addListener(resizeListener);
+		// TODO: Save/load image sets
 		loadLastSession();
 	}	
 	
@@ -177,12 +180,20 @@ public class MasterWindowController implements Initializable {
 	private void setImage(ManagedImage image) {
 		currentImage = image;
 		image.setImage(imgView, imgParent, (ZoomMode)zoomOptionsBox.getValue());
-		// TODO: set other window's image too
+		// set other window's image too
+		image.setImage(
+				ScreenMaster.getInstance().getDisplayImageView(), 
+				ScreenMaster.getInstance().getDisplayImageViewContainer(), 
+				(ZoomMode)zoomOptionsBox.getValue());
 	}
 	
 	private void changeZoomMode(ZoomMode zm){
 		if(currentImage == null) return;
 		currentImage.setImage(imgView, imgParent, zm);
+		currentImage.setImage(
+				ScreenMaster.getInstance().getDisplayImageView(), 
+				ScreenMaster.getInstance().getDisplayImageViewContainer(), 
+				zm);
 		currentCenter = new Point2D(0,0);
 		centerViewOn(currentCenter);
 	}
@@ -190,5 +201,6 @@ public class MasterWindowController implements Initializable {
 	private void centerViewOn(Point2D deltaCenter) {
 		if(currentImage == null) return;
 		currentImage.centerViewOn(deltaCenter.getX(), deltaCenter.getY(), imgView, imgParent,(ZoomMode)zoomOptionsBox.getValue());
+		currentImage.centerViewOn(deltaCenter.getX(), deltaCenter.getY(), ScreenMaster.getInstance().getDisplayImageView(), ScreenMaster.getInstance().getDisplayImageViewContainer(),(ZoomMode)zoomOptionsBox.getValue());
 	}
 }
